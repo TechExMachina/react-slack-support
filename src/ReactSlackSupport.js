@@ -271,7 +271,7 @@ class ReactSlackSupport extends Component {
           </Fab>
 
           {this.state.chatbox && (
-            <div style={{ position: "absolute", bottom: 120, right: 32 }}>
+            <div style={{ position: "fixed", zIndex: 999, bottom: 120, right: 32 }}>
               <Card
                 style={{
                   maxWidth: "35vw",
