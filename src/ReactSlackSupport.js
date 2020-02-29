@@ -260,7 +260,7 @@ class ReactSlackSupport extends Component {
         <div onClick={this.openChatBox}>
           <Fab
             color={"primary"}
-            style={{ position: "absolute", bottom: 32, right: 32 }}
+            style={{ position: "fixed", zIndex: 999, bottom: 32, right: 32 }}
           >
             <Badge
               color="secondary"
