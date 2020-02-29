@@ -1,6 +1,6 @@
 {
   "name": "react-slack-support",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "A live chat support based on Slack and Material-ui",
   "private": false,
   "main": "./dist/react-slack-support.js",
