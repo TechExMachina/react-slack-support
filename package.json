@@ -1,6 +1,6 @@
 {
   "name": "react-slack-support",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "A live chat support based on Slack and Material-ui",
   "private": false,
   "main": "./dist/react-slack-support.js",
@@ -25,6 +25,9 @@
     "type": "git",
     "url": "https://github.com/techexmachina/react-slack-support.git"
   },
+  "files": [
+    "dist"
+  ],
   "homepage": "https://github.com/techexmachina/react-slack-support#readme",
   "author": "Tech Ex Machina",
   "license": "MIT",
