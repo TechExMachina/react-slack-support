@@ -1,7 +1,5 @@
 import React, { Component } from "react";
-import PropTypes from "prop-types";
 import clsx from "clsx";
-import { WebClient } from "@slack/web-api";
 
 import makeStyles from "@material-ui/core/styles/makeStyles";
 import { Card } from "@material-ui/core";
@@ -15,53 +13,56 @@ import AttachFileIcon from "@material-ui/icons/AttachFile";
 import CardActions from "@material-ui/core/CardActions";
 
 import stylesObject from "./style.js";
+import Tooltip from "@material-ui/core/Tooltip";
+import CircularProgress from "@material-ui/core/CircularProgress";
+import ButtonGroup from "@material-ui/core/ButtonGroup";
+import Button from "@material-ui/core/Button";
 
 const useStyle = makeStyles(stylesObject);
 
-import { decodeHtml, postFile } from "./lib/chat-functions";
-
-const REFRESH_TIME = 5000;
+let timeout = null;
 
 class ReactSlackSupport extends Component {
   constructor(args) {
     super(args);
 
-    this.slack = new WebClient(atob(this.props.apiToken));
-
     this.state = {
-      onlineUsers: [],
-      channels: [],
+      users: [],
       messages: [],
       postMyMessage: "",
-      postMyFile: "",
-      chatbox: false
+      chatbox: false,
+      conversationId: null,
+      loadingNewMessage: false,
+      answer: {}
     };
 
-    this.chatInitiatedTs = "";
-    this.activeChannel = [];
-    this.activeChannelInterval = null;
-
-    // Bind Slack Message functions
     this.loadMessages = this.loadMessages.bind(this);
     this.postMyMessage = this.postMyMessage.bind(this);
     this.getUserImg = this.getUserImg.bind(this);
     this.handleChange = this.handleChange.bind(this);
     this.handleFileChange = this.handleFileChange.bind(this);
-
-    // Bind UI Animation functions
     this.openChatBox = this.openChatBox.bind(this);
     this.closeChatBox = this.closeChatBox.bind(this);
-    this.goToChatView = this.goToChatView.bind(this);
-
-    // Utils
     this.displayFormattedMessage = this.displayFormattedMessage.bind(this);
+  }
 
-    this.connectBot();
+  componentDidMount() {
+    // Attach click listener to dom to close chatbox if clicked outside
+    addEventListener("click", e => {
+      return this.state.chatbox ? this.closeChatBox(e) : null;
+    });
+  }
+
+  componentDidUpdate() {
+    this.scrollToBottom();
+  }
+
+  componentWillUnmount() {
+    if (timeout) clearTimeout(timeout);
   }
 
   displayFormattedMessage(message) {
     const { classes } = this.props;
-    let messageText = decodeHtml(message.text);
 
     const myMessage = message.username === this.props.botName;
 
@@ -83,7 +84,7 @@ class ReactSlackSupport extends Component {
               classes.bubble,
               myMessage && classes.bubbleRemote
             ])}
-            dangerouslySetInnerHTML={{ __html: messageText }}
+            dangerouslySetInnerHTML={{ __html: message.text }}
           />
         )}
 
@@ -98,111 +99,64 @@ class ReactSlackSupport extends Component {
     );
   }
 
-  connectBot() {
-    this.slack.users.list().then(data => {
-      const onlineUsers = [];
-
-      data.members
-        .filter(u => !u.deleted)
-        .forEach(
-          user =>
-            !user.is_bot &&
-            onlineUsers.push({
-              ...user,
-              real_name: user.real_name || user.name,
-              image: user.profile.image_48
-            })
-        );
-
-      this.setState({
-        onlineUsers
-      });
-    });
-
-    this.slack.conversations.list().then(data => {
-      this.setState(
-        {
-          channels: data.channels.filter(c =>
-            this.props.channels.map(c => c.name).includes(c.name)
-          )
-        },
-        () => {
-          this.activeChannel = this.state.channels[0];
-        }
-      );
-    });
-  }
-
   postMyMessage() {
-    return this.slack.chat
+    return this.props
       .postMessage({
         text: this.state.postMyMessage,
-        channel: this.activeChannel.id,
-        username: this.props.botName,
-        thread_ts: this.threadTS
+        userName: this.props.botName,
+        conversationId: this.state.conversationId
       })
-      .then(data => {
-        this.setState(
-          {
-            postMyMessage: "",
-            sendingLoader: false
-          },
-          () => {
-            // Adjust scroll height
-            setTimeout(() => {
-              const chatMessages = document.getElementById(
-                "widget-reactSlakChatMessages"
-              );
-              chatMessages.scrollTop = chatMessages.scrollHeight;
-            }, REFRESH_TIME);
-          }
-        );
-      })
-      .catch(console.error);
+      .then(() =>
+        this.setState({ postMyMessage: "", loadingNewMessage: true })
+      );
   }
 
-  loadMessages(channel) {
-    if (!this.chatInitiatedTs) this.chatInitiatedTs = Date.now() / 1000;
+  generateFirstMessage() {
+    this.setState({ loadingNewMessage: true });
 
-    const getMessagesFromSlack = async () => {
-      const conversations = await this.slack.conversations.history({
-        channel: channel.id
+    let text = `[LIVE SUPPORT] ${this.props.botName} ask a new question`;
+
+    if (this.props.defaultAsk) {
+      text += `\n\n${this.props.defaultAsk
+        .map((Q, index) => `*${Q.question}* => ${this.state.answer[index]}\n`)
+        .join("")}`;
+    }
+
+    this.props
+      .postMessage({
+        text,
+        userName: this.props.botName
+      })
+      .then(() => {
+        this.loadMessages();
       });
+  }
 
-      const myConversation = conversations.messages.find(
-        m => m.username === this.props.botName
-      );
+  loadMessages() {
+    const { refreshInterval = 5000 } = this.props;
+    if (timeout) clearTimeout(timeout);
 
-      this.threadTS = myConversation.ts;
-
-      const { messages } = await this.slack.conversations.replies({
-        channel: channel.id,
-        ts: myConversation.ts
-      });
-
-      if (this.props.defaultMessage)
-        messages.unshift({
-          text: this.props.defaultMessage,
-          ts: this.chatInitiatedTs
+    this.props
+      .getMessage(this.props.botName)
+      .then(({ messages, users, conversationId }) => {
+        const newMessages = [...messages];
+        newMessages.shift();
+        this.setState({
+          messages: newMessages,
+          users,
+          conversationId,
+          loadingNewMessage: false
         });
 
-      this.setState({ messages });
-    };
-
-    getMessagesFromSlack();
-
-    this.activeChannelInterval = setInterval(
-      getMessagesFromSlack,
-      REFRESH_TIME
-    );
+        timeout = setTimeout(this.loadMessages, refreshInterval);
+      });
   }
 
   getUserImg(message) {
     const { classes } = this.props;
     const userId = message.user || message.username;
 
-    const imageUser = this.state.onlineUsers.find(user => user.id === userId)
-      ?.image;
+    const imageUser = this.state.users.find(user => user.id === userId)?.image;
     const imgSrc = imageUser || `https://robohash.org/${userId}?set=set3`;
 
     return (
@@ -214,48 +168,17 @@ class ReactSlackSupport extends Component {
     this.setState({ postMyMessage: e.target.value });
   }
 
-  handleFileChange(e) {
+  handleFileChange() {
     const fileToUpload = document.getElementById("chat__upload").files[0];
 
-    const file = new Blob([fileToUpload]);
+    this.setState({ fileUploadLoader: true });
 
-    return this.setState(
-      {
-        postMyFile: e.target.value,
-        fileUploadLoader: true
-      },
-      () =>
-        postFile({
-          file,
-          title: file.name,
-          apiToken: atob(this.props.apiToken),
-          channel: this.activeChannel.id,
-          thread_ts: this.threadTS
-        })
-          .then(() =>
-            this.setState({
-              postMyFile: "",
-              fileUploadLoader: false
-            })
-          )
-          .catch(console.error)
-    );
-  }
-
-  goToChatView(e, channel) {
-    e.stopPropagation();
-
-    if (this.state.chatbox) {
-      this.activeChannel = channel;
-      this.setState({ chatbox: true }, () => {
-        if (this.activeChannelInterval)
-          clearInterval(this.activeChannelInterval);
-
-        document.getElementById("chat__input__text")?.focus();
-
-        this.loadMessages(channel);
-      });
-    }
+    this.props
+      .postFile({
+        file: new Blob([fileToUpload]),
+        conversationId: this.state.conversationId
+      })
+      .then(() => this.setState({ fileUploadLoader: false }));
   }
 
   openChatBox(e) {
@@ -263,29 +186,70 @@ class ReactSlackSupport extends Component {
     e.persist();
 
     if (!this.state.chatbox) {
-      this.setState(
-        {
-          chatbox: true,
-          newMessageNotification: 0
-        },
-        () => {
-          // Look to see if an active channel was already chosen...
-          if (Object.keys(this.activeChannel).length > 0)
-            this.goToChatView(e, this.activeChannel);
-        }
-      );
+      if (!(this.props.defaultAsk?.length > 0)) this.generateFirstMessage();
+
+      this.setState({ chatbox: true });
+
+      document.getElementById("chat__input__text")?.focus();
     }
   }
 
-  closeChatBox(e) {
+  closeChatBox() {
     if (this.state.chatbox) this.setState({ chatbox: false });
   }
 
-  componentDidMount() {
-    // Attach click listener to dom to close chatbox if clicked outside
-    addEventListener("click", e => {
-      return this.state.chatbox ? this.closeChatBox(e) : null;
+  scrollToBottom() {
+    const chatMessages = document.getElementById(
+      "widget-reactSlakChatMessages"
+    );
+    if (chatMessages) chatMessages.scrollTop = chatMessages.scrollHeight;
+  }
+
+  chooseAnswer(index, value) {
+    this.setState({ answer: { ...this.state.answer, [index]: value } }, () => {
+      if (
+        Object.keys(this.state.answer).length === this.props.defaultAsk.length
+      ) {
+        this.generateFirstMessage();
+        document.getElementById("chat__input__text")?.focus();
+      }
     });
+  }
+
+  displayQuestions() {
+    return (this.props.defaultAsk || []).map((Q, index) => {
+      return (
+        <div key={index}>
+          <h4>{Q.question}</h4>
+          <ButtonGroup size="small" variant="contained">
+            {Q.answer.map(a => (
+              <Button
+                color={this.state.answer[index] === a ? "primary" : undefined}
+                onClick={() => this.chooseAnswer(index, a)}
+                key={a}
+                disabled={
+                  !!this.state.answer[index] && this.state.answer[index] !== a
+                }
+              >
+                {a}
+              </Button>
+            ))}
+          </ButtonGroup>
+          <br />
+          <br />
+        </div>
+      );
+    });
+  }
+
+  canIWriteMessage() {
+    if (this.props.defaultAsk?.length > 0) {
+      return (
+        Object.keys(this.state.answer).length === this.props.defaultAsk.length
+      );
+    }
+
+    return true;
   }
 
   render() {
@@ -316,16 +280,25 @@ class ReactSlackSupport extends Component {
                 }}
               >
                 <div className={classes.header}>
-                  <div>{this.activeChannel.name}</div>
+                  <div>Live Support</div>
 
-                  <CancelIcon
-                    style={{ cursor: "pointer" }}
-                    onClick={this.closeChatBox}
-                  />
+                  <Tooltip title={"Close"}>
+                    <CancelIcon
+                      style={{ cursor: "pointer" }}
+                      onClick={this.closeChatBox}
+                    />
+                  </Tooltip>
                 </div>
 
                 <CardContent>
-                  <div id="widget-reactSlakChatMessages">
+                  <div
+                    className={classes.chatContainer}
+                    id="widget-reactSlakChatMessages"
+                  >
+                    {this.displayFormattedMessage({
+                      text: this.props.defaultMessage
+                    })}
+                    {this.displayQuestions()}
                     {this.state.messages.map(this.displayFormattedMessage)}
                   </div>
                 </CardContent>
@@ -335,31 +308,50 @@ class ReactSlackSupport extends Component {
                   {!this.state.fileUploadLoader && (
                     <div className={classes.inputContainer}>
                       <div>
-                        <label htmlFor="chat__upload">
-                          <AttachFileIcon />
-                          <input
-                            type="file"
-                            id="chat__upload"
-                            style={{ display: "none" }}
-                            value={this.state.postMyFile}
-                            onChange={e => this.handleFileChange(e)}
-                          />
-                        </label>
+                        <Tooltip title={"Click here to send a file"}>
+                          <div>
+                            <label htmlFor="chat__upload">
+                              <AttachFileIcon />
+                            </label>
+
+                            <input
+                              type="file"
+                              id="chat__upload"
+                              style={{ display: "none" }}
+                              value={this.state.postMyFile}
+                              onChange={this.handleFileChange}
+                              disabled={
+                                !this.state.conversationId ||
+                                !this.canIWriteMessage()
+                              }
+                            />
+                          </div>
+                        </Tooltip>
                       </div>
 
-                      <input
-                        type="text"
-                        className={classes.input}
-                        id="chat__input__text"
-                        value={this.state.postMyMessage}
-                        placeholder={
-                          this.props.placeholderText || "Enter your message..."
-                        }
-                        onKeyPress={e =>
-                          e.key === "Enter" ? this.postMyMessage() : null
-                        }
-                        onChange={e => this.handleChange(e)}
-                      />
+                      <div className={classes.inputContainer}>
+                        <input
+                          type="text"
+                          disabled={!this.state.conversationId}
+                          className={classes.input}
+                          id="chat__input__text"
+                          value={this.state.postMyMessage}
+                          placeholder={
+                            !this.canIWriteMessage()
+                              ? "Please ask first question"
+                              : this.state.loadingNewMessage
+                              ? "Please wait…"
+                              : "Enter your message..."
+                          }
+                          onKeyPress={e =>
+                            e.key === "Enter" && this.postMyMessage()
+                          }
+                          onChange={this.handleChange}
+                          autoComplete="off"
+                        />
+
+                        {this.state.loadingNewMessage && <CircularProgress />}
+                      </div>
                     </div>
                   )}
                 </CardActions>
@@ -371,16 +363,6 @@ class ReactSlackSupport extends Component {
     );
   }
 }
-
-// PropTypes validation
-ReactSlackSupport.propTypes = {
-  apiToken: PropTypes.string.isRequired,
-  channels: PropTypes.array.isRequired,
-  botName: PropTypes.string,
-  defaultChannel: PropTypes.string,
-  defaultMessage: PropTypes.string,
-  userImage: PropTypes.string
-};
 
 const Wrapper = props => {
   const classes = useStyle();

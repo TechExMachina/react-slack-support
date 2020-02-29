@@ -1,6 +1,6 @@
 {
   "name": "react-slack-support",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "A live chat support based on Slack and Material-ui",
   "private": false,
   "main": "./dist/react-slack-support.js",
@@ -8,10 +8,16 @@
     "start": "npx webpack-dev-server --config ./build/webpack.config.js --mode development",
     "build": "npx webpack --config ./build/webpack.config.prod.js -p --mode production",
     "test": "echo \"No test specified\" && exit 0",
-    "storybook": "start-storybook -p 6006",
-    "build-storybook": "build-storybook"
+    "storybook": "start-storybook -p 6006 --docs",
+    "build-storybook": "build-storybook --docs"
   },
-  "keywords": [],
+  "keywords": [
+    "react",
+    "live",
+    "chat",
+    "support",
+    "feedback"
+  ],
   "bugs": {
     "url": "https://github.com/techexmachina/react-slack-support/issues"
   },
@@ -43,12 +49,11 @@
     "webpack": "^4.31.0",
     "webpack-cleanup-plugin": "^0.5.1",
     "webpack-cli": "^3.3.10",
-    "webpack-dev-server": "^3.3.1"
+    "webpack-dev-server": "^3.3.1",
+    "@slack/web-api": "^5.7.0"
   },
   "dependencies": {
-    "@slack/web-api": "^5.7.0",
-    "clsx": "^1.1.0",
-    "prop-types": "15.6.2"
+    "clsx": "^1.1.0"
   },
   "peerDependencies": {
     "react": "^16.8.6",

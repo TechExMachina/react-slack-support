@@ -1,0 +1,45 @@
+import { action } from "@storybook/addon-actions";
+import ReactSlackSupport from "../src";
+
+import {
+  getSlackMessages,
+  postSlackMessage,
+  postSlackFile
+} from "./fakeServer";
+
+import { Meta, Story, Preview, Props } from "@storybook/addon-docs/blocks";
+
+<Meta title="ReactSlackSupport/WithQuestion" component={ReactSlackSupport} />
+
+# React Slack Support
+
+This is the default component to start a live support
+
+<Preview>
+  <Story name="Standard">
+    <div style={{height: '75vh'}}>
+        <ReactSlackSupport
+          botName={`Tester`}
+          userImage={
+            "http://www.iconshock.com/img_vista/FLAT/mail/jpg/robot_icon.jpg"
+          }
+          defaultMessage={
+            "Bonjour ! Merci de répondre a quelques questions pour que l'on puisse vous aider du mieux possible"
+          }
+          defaultAsk={[
+            {
+              question: "Vous êtes plutôt sel ou plutôt poivre ?",
+              answer: ["Sel", "Poivre"]
+            },
+            {
+              question: "Que pensez vous des marathons ?",
+              answer: ["Mangouste", "42 €"]
+            }
+          ]}
+          getMessage={getSlackMessages}
+          postMessage={postSlackMessage}
+          postFile={postSlackFile}
+        />
+    </div>
+  </Story>
+</Preview>

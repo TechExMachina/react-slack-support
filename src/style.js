@@ -2,9 +2,14 @@ export default theme => {
   return {
     header: {
       backgroundColor: theme.palette?.primary?.main || "#04a6fc",
+      color: "white",
       padding: 16,
       display: "flex",
       justifyContent: "space-between"
+    },
+    chatContainer: {
+      maxHeight: "50vh",
+      overflowY: "auto"
     },
     chatRow: {
       display: "flex",
@@ -25,9 +30,11 @@ export default theme => {
     },
     bubble: {
       width: "fit-content",
+      maxWidth: "calc(100% - 64px)",
       backgroundColor: "#ececec",
       borderRadius: 16,
-      padding: 8
+      padding: 8,
+      overflowWrap: "break-word"
     },
     bubbleRemote: {
       backgroundColor: "#04a6fc",
@@ -35,7 +42,9 @@ export default theme => {
     },
     inputContainer: {
       display: "flex",
-      alignItems: "center"
+      justifyContent: "space-between",
+      alignItems: "center",
+      width: "100%"
     },
     input: {
       backgroundImage: "none",

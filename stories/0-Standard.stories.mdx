@@ -1,31 +1,33 @@
-import { action } from '@storybook/addon-actions'
-import ReactSlackSupport from '../src'
+import { action } from "@storybook/addon-actions";
+import ReactSlackSupport from "../src";
 
-import { Meta, Story, Preview, Props } from '@storybook/addon-docs/blocks'
+import {
+  getSlackMessages,
+  postSlackMessage,
+  postSlackFile
+} from "./fakeServer";
+
+import { Meta, Story, Preview, Props } from "@storybook/addon-docs/blocks";
 
 <Meta title="ReactSlackSupport/Standard" component={ReactSlackSupport} />
 
 # React Slack Support
 
-This is the default component to manage a data collection
+This is the default component to start a live support
 
 <Preview>
   <Story name="Standard">
-     <ReactSlackSupport
-          botName={`Tester`}
-          apiToken="eG94Yi0xNTI1MjAxNzY5NDUtOTYzNDI3NjE5NjgxLWYySDkyVmhVUkJEYXdraTduZGNRdEJXaQ=="
-          channels={[
-            {
-              name: 'support-client'
-            }
-          ]}
-          defaultChannel={'support-client'}
-          helpText="Optional Help Text"
-          themeColor="#04a6fc"
-          userImage={'http://www.iconshock.com/img_vista/FLAT/mail/jpg/robot_icon.jpg'}
-          debugMode={false}
-          closeChatButton={true}
-          defaultMessage={'Hi !'}
-        />
+    <div style={{height: '75vh'}}>
+      <ReactSlackSupport
+        botName={`Tester`}
+        userImage={
+          "http://www.iconshock.com/img_vista/FLAT/mail/jpg/robot_icon.jpg"
+        }
+        defaultMessage={"Hi ! How can i help you ?"}
+        getMessage={getSlackMessages}
+        postMessage={postSlackMessage}
+        postFile={postSlackFile}
+      />
+    </div>
   </Story>
 </Preview>
