@@ -1,6 +1,6 @@
 {
   "name": "react-slack-support",
-  "version": "0.0.8",
+  "version": "0.1.0",
   "description": "A live chat support based on Slack and Material-ui",
   "private": false,
   "main": "./dist/react-slack-support.js",
@@ -40,6 +40,7 @@
     "@babel/runtime": "^7.4.4",
     "@material-ui/core": "^4.9.4",
     "@material-ui/icons": "^4.9.1",
+    "@slack/web-api": "^5.7.0",
     "@storybook/addon-actions": "^5.3.14",
     "@storybook/addon-docs": "^5.3.14",
     "@storybook/addon-essentials": "^5.3.14",
@@ -47,13 +48,13 @@
     "@storybook/addons": "^5.3.14",
     "@storybook/react": "^5.3.14",
     "babel-loader": "^8.0.5",
+    "contributor-faces": "^1.0.3",
     "html-webpack-plugin": "~3.2.0",
     "prettier": "^1.19.1",
     "webpack": "^4.31.0",
     "webpack-cleanup-plugin": "^0.5.1",
     "webpack-cli": "^3.3.10",
-    "webpack-dev-server": "^3.3.1",
-    "@slack/web-api": "^5.7.0"
+    "webpack-dev-server": "^3.3.1"
   },
   "dependencies": {
     "clsx": "^1.1.0"

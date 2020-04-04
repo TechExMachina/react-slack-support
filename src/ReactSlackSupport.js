@@ -253,14 +253,19 @@ class ReactSlackSupport extends Component {
   }
 
   render() {
-    const { classes } = this.props;
+    const { classes, disableFloating, buttonSize = "small" } = this.props;
 
     return (
       <div>
         <div onClick={this.openChatBox}>
           <Fab
             color={"primary"}
-            style={{ position: "fixed", zIndex: 999, bottom: 32, right: 32 }}
+            size={buttonSize}
+            style={
+              disableFloating
+                ? {}
+                : { position: "fixed", zIndex: 999, bottom: 32, right: 32 }
+            }
           >
             <Badge
               color="secondary"
@@ -271,7 +276,9 @@ class ReactSlackSupport extends Component {
           </Fab>
 
           {this.state.chatbox && (
-            <div style={{ position: "fixed", zIndex: 999, bottom: 120, right: 32 }}>
+            <div
+              style={{ position: "fixed", zIndex: 999, bottom: 120, right: 32 }}
+            >
               <Card
                 style={{
                   maxWidth: "35vw",

@@ -1,0 +1,40 @@
+import { action } from "@storybook/addon-actions";
+import ReactSlackSupport from "../src";
+
+import AppBar from '@material-ui/core/AppBar'
+
+import {
+  getSlackMessages,
+  postSlackMessage,
+  postSlackFile
+} from "./fakeServer";
+
+import { Meta, Story, Preview, Props } from "@storybook/addon-docs/blocks";
+
+<Meta title="ReactSlackSupport/DisableFloating" component={ReactSlackSupport} />
+
+# React Slack Support
+
+You can disable the floating behavior and integrate the you support's button in a TopBar, for example.
+
+<Preview>
+  <Story name="Standard">
+    <div style={{height: '75vh'}}>
+        <AppBar style={{padding: 16}} color='default' >
+            <ReactSlackSupport
+              botName={`Tester`}
+              userImage={
+                "http://www.iconshock.com/img_vista/FLAT/mail/jpg/robot_icon.jpg"
+              }
+              defaultMessage={
+                "Hello! Thank you for answering a few questions so that we can help you in the best way possible"
+              }
+              disableFloating
+              getMessage={getSlackMessages}
+              postMessage={postSlackMessage}
+              postFile={postSlackFile}
+            />
+        </AppBar>
+    </div>
+  </Story>
+</Preview>

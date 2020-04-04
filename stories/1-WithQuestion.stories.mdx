@@ -13,7 +13,7 @@ import { Meta, Story, Preview, Props } from "@storybook/addon-docs/blocks";
 
 # React Slack Support
 
-This is the default component to start a live support
+You can ask to your visitor some questions before start the discussion. That can help you to answer faster or to redirect to the good hotliner
 
 <Preview>
   <Story name="Standard">
@@ -24,16 +24,16 @@ This is the default component to start a live support
             "http://www.iconshock.com/img_vista/FLAT/mail/jpg/robot_icon.jpg"
           }
           defaultMessage={
-            "Bonjour ! Merci de répondre a quelques questions pour que l'on puisse vous aider du mieux possible"
+            "Hello! Thank you for answering a few questions so that we can help you in the best way possible"
           }
           defaultAsk={[
             {
-              question: "Vous êtes plutôt sel ou plutôt poivre ?",
-              answer: ["Sel", "Poivre"]
+              question: "Are you more salt or pepper?",
+              answer: ["Salt", "Pepper"]
             },
             {
-              question: "Que pensez vous des marathons ?",
-              answer: ["Mangouste", "42 €"]
+              question: "Is your question about a bug or a feedback?",
+              answer: ["Bug", "Feedback"]
             }
           ]}
           getMessage={getSlackMessages}
