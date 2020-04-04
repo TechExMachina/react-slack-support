@@ -8,8 +8,11 @@
 >
 > This package is only compatible with Material-ui > 4.0
 
-![react-slack-support in action](https://raw.githubusercontent.com/techexmachina/react-slack-support/master/react-slack-support-demo.png)
-![react-slack-support in action](https://raw.githubusercontent.com/techexmachina/react-slack-support/master/react-slack-support-demo2.png)
+
+|  | | 
+| ------------- | ------------- |
+| <img src="https://raw.githubusercontent.com/techexmachina/react-slack-support/master/react-slack-support-demo.png" alt="alt text" width="100%"> | <img src="https://raw.githubusercontent.com/techexmachina/react-slack-support/master/react-slack-support-demo2.png" alt="alt text" width="100%"> |
+
 
 ## Demonstration and Documentation
 
