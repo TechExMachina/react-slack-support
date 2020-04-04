@@ -17,6 +17,7 @@ import Tooltip from "@material-ui/core/Tooltip";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import ButtonGroup from "@material-ui/core/ButtonGroup";
 import Button from "@material-ui/core/Button";
+import Popper from "@material-ui/core/Popper";
 
 const useStyle = makeStyles(stylesObject);
 
@@ -35,6 +36,8 @@ class ReactSlackSupport extends Component {
       loadingNewMessage: false,
       answer: {}
     };
+
+    this.buttonRef = React.createRef();
 
     this.loadMessages = this.loadMessages.bind(this);
     this.postMyMessage = this.postMyMessage.bind(this);
@@ -253,12 +256,20 @@ class ReactSlackSupport extends Component {
   }
 
   render() {
-    const { classes, disableFloating, buttonSize = "small" } = this.props;
+    const {
+      classes,
+      disableFloating = false,
+      buttonSize = "small",
+      placement = "bottom"
+    } = this.props;
+
+    console.log("disableFloating:", disableFloating);
 
     return (
       <div>
         <div onClick={this.openChatBox}>
           <Fab
+            ref={this.buttonRef}
             color={"primary"}
             size={buttonSize}
             style={
@@ -276,8 +287,25 @@ class ReactSlackSupport extends Component {
           </Fab>
 
           {this.state.chatbox && (
-            <div
-              style={{ position: "fixed", zIndex: 999, bottom: 120, right: 32 }}
+            <Popper
+              open={true}
+              anchorEl={
+                disableFloating
+                  ? this.buttonRef.current
+                  : null
+              }
+              style={
+                disableFloating
+                  ? {}
+                  : {
+                      position: "fixed",
+                      top: "auto",
+                      left: "auto",
+                      bottom: 128,
+                      right: 32
+                    }
+              }
+              placement={placement}
             >
               <Card
                 style={{
@@ -363,7 +391,7 @@ class ReactSlackSupport extends Component {
                   )}
                 </CardActions>
               </Card>
-            </div>
+            </Popper>
           )}
         </div>
       </div>
