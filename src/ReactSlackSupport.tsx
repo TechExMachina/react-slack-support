@@ -65,11 +65,11 @@ type Props = {
    * - userName : The username of the user who post this message
    * - text : The content of the message
    */
-  postMessage: ({
-    conversationId: string,
-    userName: string,
-    text: string
-  }) => void;
+  postMessage: (props: {
+    conversationId: string | null;
+    userName: string;
+    text: string;
+  }) => Promise<any>;
   /**
    * A function to upload a new file to the server
    *
@@ -78,7 +78,7 @@ type Props = {
    * - file : the file from input
    * - conversationId : The conversationId return by the server on the first getMessage call.
    */
-  postFile: { conversationId: string; file: any };
+  postFile: (props: { conversationId: string | null; file: any }) => Promise<any>;
   /**
    * The interval between getMessage will be fetched. In milisecond
    */
@@ -203,6 +203,7 @@ const ReactSlackSupport = ({
 
     postMessage({
       text,
+      conversationId: null,
       userName: botName
     }).then(loadMessages);
   };
