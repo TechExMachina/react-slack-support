@@ -1,4 +1,4 @@
-export default theme => {
+export default (theme: any) => {
   return {
     header: {
       backgroundColor: theme.palette?.primary?.main || "#04a6fc",

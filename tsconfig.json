@@ -1,0 +1,20 @@
+{
+  "compilerOptions": {
+    "target": "esnext",
+    "moduleResolution": "node",
+    "allowJs": true,
+    "strict": true,
+    "esModuleInterop": true,
+    "jsx": "react",
+    "outDir": "./dist/",
+    "skipLibCheck": true
+  },
+  "include": ["src"],
+  "exclude": ["node_modules"],
+  "typedocOptions": {
+    "mode": "file",
+    "inputFiles": ["src/ReactSlackSupport.tsx"],
+    "out": "docs",
+    "exclude": ["*.js", "**/*.js"]
+  }
+}
