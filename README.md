@@ -8,11 +8,9 @@
 >
 > This package is only compatible with Material-ui > 4.0
 
-
-|  | | 
-| ------------- | ------------- |
+|                                                                                                                                                 |                                                                                                                                                  |
+| ----------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
 | <img src="https://raw.githubusercontent.com/techexmachina/react-slack-support/master/react-slack-support-demo.png" alt="alt text" width="100%"> | <img src="https://raw.githubusercontent.com/techexmachina/react-slack-support/master/react-slack-support-demo2.png" alt="alt text" width="100%"> |
-
 
 ## Demonstration and Documentation
 
@@ -41,7 +39,138 @@ $ yarn add react-slack-support
 
 ### Usage
 
-WAITING
+> NOTE:
+> Your Slack Webhook URL should _**never**_ be available on the front end.
+> For this reason you must have a server which sends the request to slack.
+> This component will use getMessage, postMessage, and postFile to send to Slack but it won't send the request for you.
+
+#### Client side
+
+```javascript
+const Helper = () => {
+  const getSlackMessages = userName => {
+    // call your server to get fresh messages
+  };
+  const postSlackMessage = ({ conversationId, userName, text }) => {
+    // call your server to send new message
+  };
+  const postSlackFile = ({ file, conversationId }) => {
+    // call your server to send new file
+  };
+
+  return (
+    <ReactSlackSupport
+      botName={`Tester`}
+      userImage={
+        "http://www.iconshock.com/img_vista/FLAT/mail/jpg/robot_icon.jpg"
+      }
+      defaultMessage={"Hi ! How can i help you ?"}
+      getMessage={getSlackMessages}
+      postMessage={postSlackMessage}
+      postFile={postSlackFile}
+    />
+  );
+};
+```
+
+#### Sever side
+
+Use your favorite router to expose theses functions (examples). You can do more stuff (or event connect to another provider like Microsoft Teams)
+
+```javascript
+import { WebClient } from "@slack/web-api";
+import FormData from "form-data";
+const token = atob("YOUR_SLACK_TOKEN");
+const slack = new WebClient(token);
+const CHANNEL_NAME = "support-client";
+const CACHE_TIME_USER_IN_MS = 60000;
+const CACHE_TIME_MESSAGE_IN_MS = 5000;
+
+let usersCache = { data: null, lastUpdated: 0 };
+const messagesCache = {};
+let channelId = null;
+slack.conversations.list().then(resultConversation => {
+  const channel = resultConversation.channels.find(
+    c => CHANNEL_NAME === c.name
+  );
+  channelId = channel?.id;
+});
+
+const postMessage = async function({ conversationId, userName, text }) {
+  return slack.chat.postMessage({
+    text,
+    channel: channelId,
+    username: userName,
+    thread_ts: conversationId
+  });
+};
+
+const getMessages = async function(userName) {
+  if (
+    !usersCache.lastUpdated ||
+    Date.now() > usersCache.lastUpdated + CACHE_TIME_USER_IN_MS
+  ) {
+    const resultUsers = await slack.users.list();
+    usersCache = {
+      data: resultUsers.members,
+      lastUpdated: Date.now()
+    };
+  }
+
+  if (
+    !messagesCache[userName]?.lastUpdated ||
+    Date.now() > messagesCache[userName].lastUpdated + CACHE_TIME_MESSAGE_IN_MS
+  ) {
+    const conversations = await slack.conversations.history({
+      channel: channelId
+    });
+
+    const myConversation = conversations.messages.find(
+      m => m.username === userName
+    );
+
+    let messages = [];
+    if (myConversation?.ts) {
+      const results = await slack.conversations.replies({
+        channel: channelId,
+        ts: myConversation.ts
+      });
+
+      messages = results.messages;
+    }
+
+    messagesCache[userName] = {
+      data: messages,
+      lastUpdated: Date.now(),
+      conversationId: myConversation?.ts || null
+    };
+  }
+
+  return {
+    conversationId: messagesCache[userName].conversationId,
+    messages: messagesCache[userName].data,
+    users: usersCache.data.map(m => ({ ...m, image: m.profile.image_32 }))
+  };
+};
+
+const postFile = async function({ file, conversationId }) {
+  const form = new FormData();
+
+  const filename = "Screenshot.png";
+  form.append("token", token);
+  form.append("filename", filename);
+  form.append("title", "Screenshot");
+  form.append("filetype", "auto");
+  form.append("channels", channelId);
+  form.append("file", Buffer.from(file, "base64"), { filename });
+  form.append("thread_ts", conversationId);
+
+  form.submit("https://slack.com/api/files.upload", (err, res) => {
+    if (err) throw err;
+    res.resume();
+  });
+};
+```
 
 ## Contributors
 

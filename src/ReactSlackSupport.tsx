@@ -28,13 +28,60 @@ type Question = {
   answer: string[];
 };
 
+type Message = {
+  username: string;
+  text: string;
+};
+
+type User = any;
+
+type MessagesResult = {
+  conversationId: string;
+  messages: Message[];
+  users: User[];
+};
+
 type Props = {
   botName: string;
   userImage: string;
   defaultMessage: string;
-  getMessage: Function;
-  postMessage: Function;
-  postFile: Function;
+  /**
+   * A function to get new messages from server. This function will be refetched every `refreshInterval` ms
+   *
+   * **Signature:**
+   *
+   * - userName : The username of user.
+   *
+   * **Returns:**
+   * { conversationId: string, messages: Message[], users: User[] }
+   */
+  getMessage: (username: string) => MessagesResult;
+  /**
+   * A function to post the new message to the server
+   *
+   * **Signature:**
+   *
+   * - conversationId : The conversationId return by the server on the first getMessage call.
+   * - userName : The username of the user who post this message
+   * - text : The content of the message
+   */
+  postMessage: ({
+    conversationId: string,
+    userName: string,
+    text: string
+  }) => void;
+  /**
+   * A function to upload a new file to the server
+   *
+   * **Signature:**
+   *
+   * - file : the file from input
+   * - conversationId : The conversationId return by the server on the first getMessage call.
+   */
+  postFile: { conversationId: string; file: any };
+  /**
+   * The interval between getMessage will be fetched. In milisecond
+   */
   refreshInterval?: number;
   /**
    * The call button will be display inline. It will no more positionned at the bottom right
