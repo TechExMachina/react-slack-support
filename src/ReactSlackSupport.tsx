@@ -42,8 +42,17 @@ type MessagesResult = {
 };
 
 type Props = {
+  /**
+   * A uniq username to identify the connected user and keep the conversation open (with history)
+   */
   botName: string;
+  /**
+   * An url to the user profile image
+   */
   userImage: string;
+  /**
+   * The first message automatically displayed when the user open the modal
+   */
   defaultMessage: string;
   /**
    * A function to get new messages from server. This function will be refetched every `refreshInterval` ms
@@ -55,7 +64,7 @@ type Props = {
    * **Returns:**
    * { conversationId: string, messages: Message[], users: User[] }
    */
-  getMessage: (username: string) => MessagesResult;
+  getMessage: (username: string) => Promise<MessagesResult>;
   /**
    * A function to post the new message to the server
    *
@@ -78,23 +87,25 @@ type Props = {
    * - file : the file from input
    * - conversationId : The conversationId return by the server on the first getMessage call.
    */
-  postFile: (props: { conversationId: string | null; file: any }) => Promise<any>;
+  postFile: (props: {
+    conversationId: string | null;
+    file: any;
+  }) => Promise<any>;
   /**
    * The interval between getMessage will be fetched. In milisecond
    */
   refreshInterval?: number;
   /**
-   * The call button will be display inline. It will no more positionned at the bottom right
+   * The call button will be display inline: It will no more positionned at the bottom right if this value is true
    */
   disableFloating?: boolean;
   buttonSize?: "medium" | "large" | "small" | undefined;
   placement?: PopperPlacementType;
-  defaultAsk: Question[];
+  defaultAsk?: Question[];
   /**
    * Override components used to display the widget
    */
   components?: {
-    //
     /**
      * This is the component to start the discussion (at the bottom right)
      */

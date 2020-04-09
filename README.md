@@ -48,13 +48,13 @@ $ yarn add react-slack-support
 
 ```javascript
 const Helper = () => {
-  const getSlackMessages = userName => {
+  const getSlackMessages = async (userName) => {
     // call your server to get fresh messages
   };
-  const postSlackMessage = ({ conversationId, userName, text }) => {
+  const postSlackMessage = async ({ conversationId, userName, text }) => {
     // call your server to send new message
   };
-  const postSlackFile = ({ file, conversationId }) => {
+  const postSlackFile = async ({ file, conversationId }) => {
     // call your server to send new file
   };
 
@@ -80,6 +80,7 @@ Use your favorite router to expose theses functions (examples). You can do more 
 ```javascript
 import { WebClient } from "@slack/web-api";
 import FormData from "form-data";
+import atob from 'atob';
 const token = atob("YOUR_SLACK_TOKEN");
 const slack = new WebClient(token);
 const CHANNEL_NAME = "support-client";
