@@ -1,9 +1,9 @@
 {
   "name": "react-slack-support",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "A live chat support based on Slack and Material-ui",
   "private": false,
-  "main": "./dist/react-slack-support.js",
+  "main": "./dist/ReactSlackSupport.js",
   "scripts": {
     "build": "tsc --build tsconfig.json",
     "test": "echo \"No test specified\" && exit 0",
