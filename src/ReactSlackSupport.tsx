@@ -263,7 +263,8 @@ const ReactSlackSupport = ({
     e.persist();
 
     if (!chatbox) {
-      if (!(defaultAsk && defaultAsk?.length > 0)) generateFirstMessage();
+      // @ts-ignore
+      if (!conversationId && !(defaultAsk?.length > 0)) generateFirstMessage();
 
       setChatbox(true);
 
