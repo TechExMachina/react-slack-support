@@ -10,13 +10,14 @@ import LiveHelpIcon from "@material-ui/icons/LiveHelp";
 import CancelIcon from "@material-ui/icons/Cancel";
 import AttachFileIcon from "@material-ui/icons/AttachFile";
 import CardActions from "@material-ui/core/CardActions";
-
-import stylesObject from "./style";
 import Tooltip from "@material-ui/core/Tooltip";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import ButtonGroup from "@material-ui/core/ButtonGroup";
 import Button from "@material-ui/core/Button";
 import Popper from "@material-ui/core/Popper";
+
+import stylesObject from "./style";
+import { Components } from "./types/components";
 
 // @ts-ignore
 const useStyle = makeStyles(stylesObject);
@@ -105,12 +106,7 @@ type Props = {
   /**
    * Override components used to display the widget
    */
-  components?: {
-    /**
-     * This is the component to start the discussion (at the bottom right)
-     */
-    callButton?: React.FC;
-  };
+  components?: Components;
 };
 
 const ReactSlackSupport = ({
@@ -127,11 +123,11 @@ const ReactSlackSupport = ({
   defaultMessage,
   components
 }: Props) => {
-  const [users, setUsers] = useState([]);
+  const [users, setUsers] = useState<any>([]);
   const [messages, setMessages] = useState([]);
   const [postMyMessage, setPostMyMessage] = useState("");
   const [chatbox, setChatbox] = useState(false);
-  const [conversationId, setConversationId] = useState(null);
+  const [conversationId, setConversationId] = useState<string | null>(null);
   const [loadingNewMessage, setLoadingNewMessage] = useState<boolean>(false);
   const [answer, setAnswer] = useState<Record<number, string>>({});
   const [fileUploadLoader, setFileUploadLoader] = useState<boolean>(false);
@@ -267,7 +263,7 @@ const ReactSlackSupport = ({
     e.persist();
 
     if (!chatbox) {
-      if (!(defaultAsk?.length > 0)) generateFirstMessage();
+      if (!(defaultAsk && defaultAsk?.length > 0)) generateFirstMessage();
 
       setChatbox(true);
 
@@ -289,7 +285,7 @@ const ReactSlackSupport = ({
   const chooseAnswer = (index: number, value: string) => {
     setAnswer({ ...answer, [index]: value });
 
-    if (Object.keys(answer).length === defaultAsk.length) {
+    if (Object.keys(answer).length === defaultAsk?.length) {
       generateFirstMessage();
       document.getElementById("chat__input__text")?.focus();
     }
@@ -322,7 +318,7 @@ const ReactSlackSupport = ({
   };
 
   const canIWriteMessage = () => {
-    if (defaultAsk?.length > 0) {
+    if (defaultAsk && defaultAsk?.length > 0) {
       return Object.keys(answer).length === defaultAsk.length;
     }
 

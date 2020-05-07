@@ -7,6 +7,10 @@ import {
   postSlackFile
 } from "./fakeServer";
 
+import {
+  FaceComponentForComponentsProps,
+} from '../src/ComponentsForStories'
+
 import { Meta, Story, Preview, Props } from "@storybook/addon-docs/blocks";
 
 <Meta title="ReactSlackSupport/Standard" component={ReactSlackSupport} />
@@ -35,3 +39,7 @@ This is the default component to start a live support
 ## Props
 
 <Props of={ReactSlackSupport} />
+
+## Components Object <a id="ComponentsProps" />
+
+<Props of={FaceComponentForComponentsProps} />
