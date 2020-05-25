@@ -215,11 +215,11 @@ const ReactSlackSupport = ({
     }).then(loadMessages);
   };
 
-  const loadMessages = () => {
+  const loadMessages = async() => {
     if (timeout) clearTimeout(timeout);
 
     // @ts-ignore
-    getMessage(botName).then(({ messages, users, conversationId }) => {
+    const { messages, users, conversationId } = await getMessage(botName)
       const newMessages = [...messages];
       newMessages.shift();
       // @ts-ignore
@@ -229,7 +229,7 @@ const ReactSlackSupport = ({
       setLoadingNewMessage(false);
 
       timeout = setTimeout(loadMessages, refreshInterval);
-    });
+      return conversationId
   };
 
   const getUserImg = (message: any) => {
@@ -258,13 +258,18 @@ const ReactSlackSupport = ({
     }).then(() => setFileUploadLoader(false));
   };
 
-  const openChatBox = (e: any) => {
+  const openChatBox = async(e: any) => {
     e.stopPropagation();
     e.persist();
 
     if (!chatbox) {
+      setLoadingNewMessage(true);
       // @ts-ignore
-      if (!conversationId && !(defaultAsk?.length > 0)) generateFirstMessage();
+      if (!conversationId && !(defaultAsk?.length > 0)) {
+        const newConversationId = await loadMessages()
+        // @ts-ignore
+        if (!newConversationId && !(defaultAsk?.length > 0)) generateFirstMessage();
+      }
 
       setChatbox(true);
 
