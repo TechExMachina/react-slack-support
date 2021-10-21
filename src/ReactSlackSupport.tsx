@@ -23,6 +23,7 @@ import { Components } from "./types/components";
 const useStyle = makeStyles(stylesObject);
 
 let timeout: any = null;
+let timeoutClose: any = null;
 
 type Question = {
   question: string;
@@ -105,6 +106,7 @@ type Props = {
    */
   disableFloating?: boolean;
   openOnStart?: boolean;
+  autoCloseTimeout?: boolean;
   buttonSize?: "medium" | "large" | "small" | undefined;
   placement?: PopperPlacementType;
   defaultAsk?: Question[];
@@ -123,7 +125,8 @@ const ReactSlackSupport = ({
   postMessage,
   getMessage,
   refreshInterval = 5000,
-  openOnStart=false,
+  openOnStart = false,
+  autoCloseTimeout = false,
   botName,
   userImage,
   defaultMessage,
@@ -158,6 +161,15 @@ const ReactSlackSupport = ({
   }, []);
 
   useEffect(() => scrollToBottom());
+  useEffect(() =>{
+    // @ts-ignore
+    if (chatbox && openOnStart && autoCloseTimeout) {
+      timeoutClose = setTimeout( closeChatBox , 5000)
+      return () => {
+        if (timeoutClose) clearTimeout(timeoutClose);
+      };
+    }
+  } , []);
 
   const displayFormattedMessage = (message: any) => {
     const myMessage = message.username === botName;
