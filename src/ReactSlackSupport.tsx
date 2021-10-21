@@ -55,6 +55,10 @@ type Props = {
    * The first message automatically displayed when the user open the modal
    */
   defaultMessage: string;
+
+  defaultMessageEnterYourMessage: string;
+  defaultMessagePleaseAskFirstQuestion: string;
+  defaultMessagePleaseWait: string;
   /**
    * A function to get new messages from server. This function will be refetched every `refreshInterval` ms
    *
@@ -123,6 +127,9 @@ const ReactSlackSupport = ({
   botName,
   userImage,
   defaultMessage,
+  defaultMessageEnterYourMessage = "Enter your message...",
+  defaultMessagePleaseAskFirstQuestion = "Please ask first question",
+  defaultMessagePleaseWait = "Please wait…",
   components
 }: Props) => {
   const [users, setUsers] = useState<any>([]);
@@ -432,10 +439,10 @@ const ReactSlackSupport = ({
                         value={postMyMessage}
                         placeholder={
                           !canIWriteMessage()
-                            ? "Please ask first question"
+                            ? defaultMessagePleaseAskFirstQuestion
                             : loadingNewMessage
-                            ? "Please wait…"
-                            : "Enter your message..."
+                            ? defaultMessagePleaseWait
+                            : defaultMessageEnterYourMessage
                         }
                         onKeyPress={e => e.key === "Enter" && postMyMessageFn()}
                         onChange={handleChange}
