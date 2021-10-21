@@ -100,6 +100,7 @@ type Props = {
    * The call button will be display inline: It will no more positionned at the bottom right if this value is true
    */
   disableFloating?: boolean;
+  openOnStart?: boolean;
   buttonSize?: "medium" | "large" | "small" | undefined;
   placement?: PopperPlacementType;
   defaultAsk?: Question[];
@@ -118,6 +119,7 @@ const ReactSlackSupport = ({
   postMessage,
   getMessage,
   refreshInterval = 5000,
+  openOnStart=false,
   botName,
   userImage,
   defaultMessage,
@@ -126,7 +128,7 @@ const ReactSlackSupport = ({
   const [users, setUsers] = useState<any>([]);
   const [messages, setMessages] = useState([]);
   const [postMyMessage, setPostMyMessage] = useState("");
-  const [chatbox, setChatbox] = useState(false);
+  const [chatbox, setChatbox] = useState(openOnStart);
   const [conversationId, setConversationId] = useState<string | null>(null);
   const [loadingNewMessage, setLoadingNewMessage] = useState<boolean>(false);
   const [answer, setAnswer] = useState<Record<number, string>>({});
